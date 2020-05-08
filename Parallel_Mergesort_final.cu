@@ -70,7 +70,7 @@ __host__ void merge(int *a, int left_start, int right_end) { // a is source arra
 
 __device__ __host__ void merge_gpu(int *a, int *b, int left_start, int right_end, int lev) { // a is source array, b is temp array
     int left1, right1, left2, right2, k, i, j;
-    int len_arr = right_end - left_start + 1;
+    //int len_arr = right_end - left_start + 1;
     int size = pow(2, lev);
 
     k = left_start;
@@ -152,8 +152,8 @@ int main() {
     test_merge();
     */
 
-    int n = 256;
-    int num_threads_per_block = 16;
+    int n = pow(2,13);
+    int num_threads_per_block = 1;
     int* h_arr =  (int *) malloc(sizeof(int)*n);
 
     //generate an array with numbers
@@ -173,6 +173,11 @@ int main() {
     gstart();
     int flag;
     for (int lev = 0; lev < log2(n); lev++) {   // lev means level
+        /*
+        if ( ( n / num_threads_per_block / pow(2, lev+1) ) == 1) {
+            num_threads_per_block = num_threads_per_block / 2;
+        }
+        */
         gpu_mergesort_serial_merge<<< n / num_threads_per_block / pow(2, lev+1) , num_threads_per_block >>>(d_arr, d_temp, lev);
         flag = 0;
         lev++;
@@ -200,6 +205,7 @@ int main() {
 
 
     // debug
+    /*
     printf("gpu result: \n");
     for (int i = 0; i < n; i++) {
         printf("%d ", gpu_result[i]);
@@ -212,6 +218,7 @@ int main() {
         printf("%d ", h_arr[i]);
     }
     printf("\n");
+    */
 
     // compare cpu_result with gpu_result
     int error = 0;
